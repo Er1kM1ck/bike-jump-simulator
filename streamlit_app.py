@@ -140,7 +140,7 @@ wind_vy = wind_speed * np.sin(np.deg2rad(wind_angle))
 
 xs, ys, vxs, vys, ts = simulate_projectile(v0, angle, mass, area, Cd, rho, wind_vx, wind_vy, g)
 hx, hy, h_idx = apex(xs, ys)
-tx, ty = landing_po
+tx, ty = xs[-1], ys[-1]
 
 trx, try_, ramp_len = takeoff_ramp(v0, angle)
 lx, ly = tangent_landing_ramp(xs, ys, vxs, vys, max_drop)
@@ -182,5 +182,6 @@ elif g_force > 5:
     st.warning("⚠️ Moderate injury risk")
 else:
     st.success("✅ Landing forces within safer range")
+
 
 
