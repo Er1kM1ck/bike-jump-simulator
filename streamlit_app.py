@@ -117,8 +117,7 @@ else:
     v0 = st.slider("Launch Speed (ft/s)", 20.0, 117.0, 72.0)  # up to 80 mph
     angle = st.slider("Launch Angle (degrees)", 5.0, 60.0, 28.0)
     mass_lb = st.slider("Bike + Rider Weight (lb)", 120.0, 300.0, 200.0)
-mass = mass_lb / g  # convert lb to slugs internally
-area = st.slider("Cross-sectional Area (ft²)", 1.0, 22.0, 7.5)  # 0.1–2 m² equiv
+    mass = mass_lb / g  # convert lb to slugs internally
     area = st.slider("Cross-sectional Area (ft²)", 1.0, 22.0, 7.5)  # 0.1–2 m² equiv
     max_drop = 4.0
     units = "ft"
