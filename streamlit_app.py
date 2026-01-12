@@ -105,7 +105,7 @@ unit_system = st.radio("Unit System", ["Metric", "Imperial"])
 # Landing elevation relative to takeoff
 landing_height = st.slider("Landing Elevation (relative to takeoff)", -10.0, 10.0, 0.0) if unit_system == "Metric" else st.slider("Landing Elevation (relative to takeoff)", -30.0, 30.0, 0.0)
 
-unit_system = unit_system("Unit System", ["Metric", "Imperial"])
+unit_system = st.radio("Unit System", ["Metric", "Imperial"])
 
 if unit_system == "Metric":
     g = 9.81
@@ -178,3 +178,4 @@ elif g_force > 5:
     st.warning("⚠️ Moderate injury risk")
 else:
     st.success("✅ Landing forces within safer range")
+
