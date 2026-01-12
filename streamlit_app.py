@@ -50,7 +50,11 @@ def simulate_projectile(v0, angle_deg, mass, area, Cd, rho, wind_vx, wind_vy, g,
 
 def apex(xs, ys):
     i = np.argmax(ys)
-    return xs[i], ys[i]
+    return xs[i], ys[i], i
+
+
+def terminus(xs, ys):
+    return xs[-1], ys[-1]
 
 # ----------------------
 # Ramp Geometry
@@ -101,19 +105,20 @@ unit_system = st.radio("Unit System", ["Metric", "Imperial"])
 if unit_system == "Metric":
     g = 9.81
     rho = 1.225
-    v0 = st.slider("Launch Speed (m/s)", 5.0, 40.0, 22.0)
+    v0 = st.slider("Launch Speed (m/s)", 5.0, 36.0, 22.0)
     angle = st.slider("Launch Angle (degrees)", 5.0, 60.0, 28.0)
     mass = st.slider("Bike + Rider Mass (kg)", 70.0, 150.0, 120.0)
-    area = st.slider("Cross-sectional Area (m²)", 0.3, 1.2, 0.7)
+    area = st.slider("Cross-sectional Area (m²)", 0.1, 2.0, 0.7)
     max_drop = 1.22
     units = "m"
 else:
     g = 32.17
     rho = 0.00237
-    v0 = st.slider("Launch Speed (ft/s)", 20.0, 130.0, 72.0)
+    v0 = st.slider("Launch Speed (ft/s)", 20.0, 117.0, 72.0)  # up to 80 mph
     angle = st.slider("Launch Angle (degrees)", 5.0, 60.0, 28.0)
-    mass = st.slider("Bike + Rider Mass (slug)", 4.0, 8.0, 5.0)
-    area = st.slider("Cross-sectional Area (ft²)", 4.0, 12.0, 7.5)
+    mass_lb = st.slider("Bike + Rider Weight (lb)", 120.0, 300.0, 200.0)
+mass = mass_lb / g  # convert lb to slugs internally
+    area = st.slider("Cross-sectional Area (ft²)", 1.0, 22.0, 7.5)  # 0.1–2 m² equiv
     max_drop = 4.0
     units = "ft"
 
@@ -125,7 +130,8 @@ wind_vx = wind_speed * np.cos(np.deg2rad(wind_angle))
 wind_vy = wind_speed * np.sin(np.deg2rad(wind_angle))
 
 xs, ys, vxs, vys, ts = simulate_projectile(v0, angle, mass, area, Cd, rho, wind_vx, wind_vy, g)
-hx, hy = apex(xs, ys)
+hx, hy, h_idx = apex(xs, ys)
+tx, ty = terminus(xs, ys)
 
 trx, try_, ramp_len = takeoff_ramp(v0, angle)
 lx, ly = tangent_landing_ramp(xs, ys, vxs, vys, max_drop)
@@ -141,7 +147,9 @@ ax.plot(xs, ys, label="Flight Path")
 ax.plot(trx, try_, label=f"Takeoff Ramp ({ramp_len:.2f} {units})")
 ax.plot(lx, ly, label="Safe Landing Ramp")
 ax.scatter(hx, hy)
+ax.scatter(tx, ty)
 ax.text(hx, hy, f" Apex ({hx:.2f}, {hy:.2f})")
+ax.text(tx, ty, f" Terminus ({tx:.2f}, {ty:.2f})")
 ax.set_xlabel(f"Horizontal Distance ({units})")
 ax.set_ylabel(f"Vertical Height ({units})")
 ax.legend()
