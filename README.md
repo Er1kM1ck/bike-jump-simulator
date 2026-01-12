@@ -9,6 +9,12 @@ The goal is to help diggers dig, shape, pack, and ride more safely, lowering (no
 injuries on jumps. I took inspiration from skijump.info, and others trying to incorporate Equivalent Fall Heights. 
 This is an open source Humanist venture. More feature development to come I hope.
 
+Features:
+-Wind resistance & direction
+-Tangent-matched landing ramp
+-Takeoff ramp length
+-Rider impact g-force estimation
+-Metric & Imperial units
 
 ## Run locally
 ```bash
