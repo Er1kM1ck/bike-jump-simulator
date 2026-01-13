@@ -221,6 +221,38 @@ jump_feasible = (
     xs[-1] > 1.0                     # ensures meaningful horizontal travel
 )
 
+# ----------------------
+# Minimum speed required to clear landing
+# ----------------------
+
+def required_speed_to_clear(angle_deg, landing_height, g):
+    angle = np.deg2rad(angle_deg)
+    sin2 = np.sin(2 * angle)
+    if sin2 <= 0:
+        return None
+    return np.sqrt((g * abs(landing_height)) / sin2)
+
+v_required = required_speed_to_clear(angle, landing_height, g)
+
+# ----------------------
+# Slider Guidance Logic
+# ----------------------
+
+problem_slider = None
+guidance_message = None
+
+if not jump_feasible:
+    if wind_speed < -5:
+        problem_slider = "wind"
+        guidance_message = "Strong headwind detected — reduce headwind first"
+    elif landing_height > hy * 0.9:
+        problem_slider = "landing"
+        guidance_message = "Landing is near or above apex — lower landing elevation"
+    elif v_required and v0 < v_required:
+        problem_slider = "speed"
+        guidance_message = "Launch speed too low to clear landing"
+    else:
+        guidance_message = "Try increasing speed or lowering landing elevation"
 
 # ----------------------
 # Offending Slider Detection (B)
@@ -277,6 +309,25 @@ else:
     st.success("✅ Jump is physically feasible with current settings.")
 
 
+# ----------------------
+# Feasibility Warning Display
+# ----------------------
+
+if not jump_feasible:
+    st.error("❌ Cannot clear landing with current settings")
+
+    if v_required:
+        if unit_system == "Metric":
+            st.warning(
+                f"Minimum required launch speed: **{v_required*3.6:.1f} km/hr**"
+            )
+        else:
+            st.warning(
+                f"Minimum required launch speed: **{v_required/1.46667:.1f} mi/hr**"
+            )
+
+    if guidance_message:
+        st.info(f"Suggested adjustment: {guidance_message}")
 
 # ----------------------
 # Plot
@@ -390,6 +441,7 @@ elif g_force > 5:
     st.warning("⚠️ Moderate injury risk")
 else:
     st.success("✅ Landing forces within safer design range")
+
 
 
 
