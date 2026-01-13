@@ -99,35 +99,57 @@ def impact_metrics(mass, vxs, vys, max_drop, g):
 
 st.set_page_config(layout="wide")
 st.title("Bike Jump Simulator")
+plot_placeholder = st.empty()
+plot_placeholder.pyplot(fig)
+
 
 unit_system = st.radio("Unit System", ["Metric", "Imperial"])
 
 # Landing elevation relative to takeoff
 landing_height = st.slider("Landing Elevation (relative to takeoff)", -10.0, 10.0, 0.0) if unit_system == "Metric" else st.slider("Landing Elevation (relative to takeoff)", -30.0, 30.0, 0.0)
 
-
-
 if unit_system == "Metric":
     g = 9.81
     rho = 1.225
-    v0_kmh = st.slider("Launch Speed (km/hr)", 5.0, 130.0, 80.0)
-    v0 = v0_kmh/3.6
-    angle = st.slider("Launch Angle (degrees)", 5.0, 60.0, 28.0)
-    mass = st.slider("Bike + Rider Mass (kg)", 70.0, 150.0, 120.0)
-    area = st.slider("Cross-sectional Area (m²)", 0.1, 2.0, 0.7)
-    max_drop = 1.22
     units = "m"
+    max_drop = 1.22
+
+    col1, col2 = st.columns(2)
+    with col1:
+        v0_kmh = st.slider("Launch Speed (km/hr)", 5.0, 130.0, 80.0)
+    with col2:
+        angle = st.slider("Launch Angle (degrees)", 5.0, 60.0, 28.0)
+
+    v0 = v0_kmh / 3.6
+
+    col3, col4 = st.columns(2)
+    with col3:
+        mass = st.slider("Bike + Rider Mass (kg)", 70.0, 150.0, 120.0)
+    with col4:
+        area = st.slider("Cross-sectional Area (m²)", 0.1, 2.0, 0.7)
+
 else:
     g = 32.17
     rho = 0.00237
-    v0_mph = st.slider("Launch Speed (mi/hr)", 5.0, 80.0, 30.0)  # up to 80 mph
-    v0=v0_mph*1.46667
-    angle = st.slider("Launch Angle (degrees)", 5.0, 60.0, 28.0)
-    mass_lb = st.slider("Bike + Rider Weight (lb)", 120.0, 300.0, 200.0)
-    mass = mass_lb / g  # convert lb to slugs internally
-    area = st.slider("Cross-sectional Area (ft²)", 1.0, 22.0, 7.5)  # 0.1–2 m² equiv
-    max_drop = 4.0
     units = "ft"
+    max_drop = 4.0
+
+    col1, col2 = st.columns(2)
+    with col1:
+        v0_mph = st.slider("Launch Speed (mi/hr)", 5.0, 80.0, 30.0)
+    with col2:
+        angle = st.slider("Launch Angle (degrees)", 5.0, 60.0, 28.0)
+
+    v0 = v0_mph * 1.46667
+
+    col3, col4 = st.columns(2)
+    with col3:
+        mass_lb = st.slider("Bike + Rider Weight (lb)", 120.0, 300.0, 200.0)
+        mass = mass_lb / g
+    with col4:
+        area = st.slider("Cross-sectional Area (ft²)", 1.0, 22.0, 7.5)
+
+
 
 Cd = st.slider("Drag Coefficient", 0.5, 1.3, 1.0)
 wind_speed = st.slider(f"Wind Speed ({units}/s)", -30.0, 30.0, -5.0)
@@ -149,7 +171,8 @@ v_imp, KE, F_avg, g_force = impact_metrics(mass, vxs, vys, max_drop, g)
 # Plot
 # ----------------------
 
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(9, 5))
+
 ax.plot(xs, ys, label="Flight Path")
 ax.plot(trx, try_, label=f"Takeoff Ramp ({ramp_len:.2f} {units})")
 ax.plot(lx, ly, label="Safe Landing Ramp")
@@ -162,7 +185,6 @@ ax.set_ylabel(f"Vertical Height ({units})")
 ax.legend()
 ax.grid(True)
 
-st.pyplot(fig)
 
 # ----------------------
 # Safety Readout
@@ -180,6 +202,7 @@ elif g_force > 5:
     st.warning("⚠️ Moderate injury risk")
 else:
     st.success("✅ Landing forces within safer range")
+
 
 
 
