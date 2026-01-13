@@ -190,19 +190,47 @@ plot_placeholder.pyplot(fig)
 # Safety Readout
 # ----------------------
 
-st.subheader("Impact & Safety Metrics")
-st.write(f"Impact speed: **{v_imp:.2f} {units}/s**")
-st.write(f"Kinetic energy at impact: **{KE:.1f}**")
-st.write(f"Average stopping force: **{F_avg:.1f}**")
-st.write(f"Equivalent g-force on rider: **{g_force:.2f} g**")
+st.subheader("Impact & Rider Safety Metrics")
+
+if unit_system == "Metric":
+    KE_display = KE
+    KE_units = "J"
+    F_display = F_avg
+    F_units = "N"
+    body_weight_force = mass * g
+else:
+    KE_display = KE / 1.35582          # J → ft-lb
+    KE_units = "ft·lb"
+    F_display = F_avg                  # already in lbf
+    F_units = "lbf"
+    body_weight_force = mass * g       # equals weight in lb
+
+force_multiple = F_display / body_weight_force
+
+st.write(f"**Impact speed:** {v_imp:.2f} {units}/s")
+st.write(f"**Kinetic energy at impact:** {KE_display:.1f} {KE_units}")
+st.write(f"**Average stopping force:** {F_display:.1f} {F_units}")
+st.write(f"**Equivalent rider load:** {force_multiple:.1f} × body weight")
+st.write(f"**Equivalent g-force on rider:** {g_force:.2f} g")
+
+st.markdown(
+    """
+**Design guidance (rule-of-thumb):**
+- 🟢 **< 5 g** → generally safer / controllable landing  
+- 🟡 **5–10 g** → increasing injury risk  
+- 🔴 **> 10 g** → high risk of serious injury  
+
+*Landing ramps are typically designed to limit effective fall height
+and keep rider g-loads below ~5 g where possible.*
+"""
+)
 
 if g_force > 10:
     st.error("⚠️ High injury risk: excessive g-forces")
 elif g_force > 5:
     st.warning("⚠️ Moderate injury risk")
 else:
-    st.success("✅ Landing forces within safer range")
-
+    st.success("✅ Landing forces within safer design range")
 
 
 
