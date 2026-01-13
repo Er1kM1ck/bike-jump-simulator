@@ -102,7 +102,6 @@ st.title("Bike Jump Simulator")
 plot_placeholder = st.empty()
 plot_placeholder.pyplot(fig)
 
-
 unit_system = st.radio("Unit System", ["Metric", "Imperial"])
 
 # Landing elevation relative to takeoff
@@ -185,6 +184,7 @@ ax.set_ylabel(f"Vertical Height ({units})")
 ax.legend()
 ax.grid(True)
 
+plot_placeholder.pyplot(fig)
 
 # ----------------------
 # Safety Readout
@@ -202,6 +202,7 @@ elif g_force > 5:
     st.warning("⚠️ Moderate injury risk")
 else:
     st.success("✅ Landing forces within safer range")
+
 
 
 
