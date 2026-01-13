@@ -18,10 +18,11 @@ import matplotlib.pyplot as plt
 
 def simulate_projectile(
     v0, angle_deg, mass, area, Cd, rho, wind_vx, wind_vy, g,
-    landing_height=-1e6,
+    ground_height=0.0,
     dt=0.01,
     t_max=30
 ):
+
     angle = np.deg2rad(angle_deg)
     vx = v0 * np.cos(angle)
     vy = v0 * np.sin(angle)
@@ -29,7 +30,7 @@ def simulate_projectile(
 
     xs, ys, vxs, vys, ts = [x], [y], [vx], [vy], [t]
 
-    while y >= -1e6 and t < t_max:
+    while y >= ground_height and t < t_max:
         vrel_x = vx - wind_vx
         vrel_y = vy - wind_vy
         vrel = np.hypot(vrel_x, vrel_y)
@@ -219,9 +220,10 @@ landing_height = st.slider(
     value=min(0.0, float(apex_height)),
     help="Landing height cannot exceed the apex of the jump"
 )
+
 xs, ys, vxs, vys, ts = simulate_projectile(
     v0, angle, mass, area, Cd, rho, wind_vx, wind_vy, g,
-    landing_height=landing_height
+    ground_height=min(0.0, landing_height)
 )
 
 hx, hy, h_idx = apex(xs, ys)
@@ -467,6 +469,7 @@ elif g_force > 5:
     st.warning("⚠️ Moderate injury risk")
 else:
     st.success("✅ Landing forces within safer design range")
+
 
 
 
