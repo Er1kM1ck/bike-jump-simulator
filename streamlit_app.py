@@ -177,6 +177,24 @@ wind_angle = st.slider("Wind Direction (deg, 0=headwind)", -180.0, 180.0, 0.0)
 wind_vx = wind_speed * np.cos(np.deg2rad(wind_angle))
 wind_vy = wind_speed * np.sin(np.deg2rad(wind_angle))
 
+# ----------------------
+# Temporary simulation to determine apex height
+# ----------------------
+
+xs_tmp, ys_tmp, _, _, _ = simulate_projectile(
+    v0,
+    angle,
+    mass,
+    area,
+    Cd,
+    rho,
+    wind_vx,
+    wind_vy,
+    g
+)
+
+_, apex_height, _ = apex(xs_tmp, ys_tmp)
+
 
 landing_height = st.slider(
     "Landing Elevation (relative to takeoff)",
@@ -301,6 +319,7 @@ elif g_force > 5:
     st.warning("⚠️ Moderate injury risk")
 else:
     st.success("✅ Landing forces within safer design range")
+
 
 
 
