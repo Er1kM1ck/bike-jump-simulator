@@ -211,6 +211,33 @@ xs, ys, vxs, vys, ts = simulate_projectile(
 hx, hy, h_idx = apex(xs, ys)
 tx, ty = xs[-1], ys[-1]
 
+# ----------------------
+# Feasibility Check (A)
+# ----------------------
+
+jump_feasible = (
+    len(xs) > 5 and
+    np.max(ys) >= landing_height
+)
+
+# ----------------------
+# User Guidance (B)
+# ----------------------
+
+if not jump_feasible:
+    st.error(
+        "⚠️ Jump not feasible with current settings.\n\n"
+        "The rider does not reach the landing elevation.\n\n"
+        "Suggested adjustments:\n"
+        "• Reduce headwind speed\n"
+        "• Increase launch speed\n"
+        "• Lower landing elevation\n"
+        "• Increase launch angle slightly"
+    )
+    st.stop()
+
+
+
 trx, try_, ramp_len = takeoff_ramp(v0, angle)
 lx, ly = tangent_landing_ramp(xs, ys, vxs, vys, max_drop)
 
@@ -337,6 +364,7 @@ elif g_force > 5:
     st.warning("⚠️ Moderate injury risk")
 else:
     st.success("✅ Landing forces within safer design range")
+
 
 
 
