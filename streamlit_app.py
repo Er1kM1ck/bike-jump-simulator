@@ -60,6 +60,16 @@ def apex(xs, ys):
 
 def landing_point(xs, ys):
     return xs[-1], ys[-1]
+    
+def find_safe_landing_index(xs, ys, landing_height, max_drop):
+    """
+    Returns the earliest index where the rider can safely contact the landing
+    based on equivalent free-fall height.
+    """
+    for i in range(len(xs)):
+        if ys[i] - landing_height <= max_drop:
+            return i
+    return None
 
 # ----------------------
 # Ramp Geometry
@@ -72,34 +82,32 @@ def takeoff_ramp(v0, angle_deg, duration=0.25):
     y = np.array([-length * np.sin(angle), 0])
     return x, y, length
 
-def tangent_landing_ramp(xs, ys, vxs, vys, max_drop):
+def tangent_landing_ramp(xs, ys, vxs, vys, landing_height, max_drop):
     """
-    Landing ramp that:
-    - Is tangent to the trajectory at landing
-    - Never exceeds the flight path (guaranteed)
-    - Works for step-ups and step-downs
+    Builds a landing ramp that begins at the earliest SAFE contact point,
+    not at the projectile terminus.
     """
+    idx = find_safe_landing_index(xs, ys, landing_height, max_drop)
 
-    x0, y0 = xs[-1], ys[-1]
-    slope = vys[-1] / vxs[-1]
+    if idx is None:
+        return [], []
 
-    # Build ramp domain near landing
-    x = np.linspace(x0 - 6 * max_drop, x0, 200)
+    x0 = xs[idx]
+    y0 = ys[idx]
 
-    # Tangent line
-    y_tangent = y0 + slope * (x - x0)
+    vx = vxs[idx]
+    vy = vys[idx]
 
-    # Curved ramp below tangent (energy-limited drop)
-    y_ramp = y_tangent - (x - x0)**2 / (4 * max_drop)
+    if abs(vx) < 1e-6:
+        return [], []
 
-    # Interpolate actual trajectory for comparison
-    y_flight_interp = np.interp(x, xs, ys)
+    slope = vy / vx
 
-    # HARD SAFETY CONSTRAINT:
-    # Ramp can never exceed the flight path
-    y_safe = np.minimum(y_ramp, y_flight_interp)
+    ramp_x = np.linspace(x0, x0 + 5, 50)
+    ramp_y = y0 + slope * (ramp_x - x0)
 
-    return x, y_safe
+    return ramp_x, ramp_y
+
 
 # ----------------------
 # Impact & Energy Safety
@@ -441,6 +449,7 @@ elif g_force > 5:
     st.warning("⚠️ Moderate injury risk")
 else:
     st.success("✅ Landing forces within safer design range")
+
 
 
 
