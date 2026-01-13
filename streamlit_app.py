@@ -67,19 +67,34 @@ def takeoff_ramp(v0, angle_deg, duration=0.25):
     y = np.array([-length * np.sin(angle), 0])
     return x, y, length
 
-
 def tangent_landing_ramp(xs, ys, vxs, vys, max_drop):
-    # Landing ramp tangent to trajectory at terminus and strictly below it
-    # Uses downward-opening curvature so ramp stays below flight path
+    """
+    Landing ramp that:
+    - Is tangent to the trajectory at landing
+    - Never exceeds the flight path (guaranteed)
+    - Works for step-ups and step-downs
+    """
+
     x0, y0 = xs[-1], ys[-1]
     slope = vys[-1] / vxs[-1]
 
-    # Build ramp only near the end of flight
-    x = np.linspace(x0 - 4 * max_drop, x0, 120)
+    # Build ramp domain near landing
+    x = np.linspace(x0 - 6 * max_drop, x0, 200)
 
-    # Tangent line minus quadratic drop (opens downward)
-    y = slope * (x - x0) - (x - x0)**2 / (4 * max_drop)
-    return x, y
+    # Tangent line
+    y_tangent = y0 + slope * (x - x0)
+
+    # Curved ramp below tangent (energy-limited drop)
+    y_ramp = y_tangent - (x - x0)**2 / (4 * max_drop)
+
+    # Interpolate actual trajectory for comparison
+    y_flight_interp = np.interp(x, xs, ys)
+
+    # HARD SAFETY CONSTRAINT:
+    # Ramp can never exceed the flight path
+    y_safe = np.minimum(y_ramp, y_flight_interp)
+
+    return x, y_safe
 
 # ----------------------
 # Impact & Energy Safety
@@ -167,6 +182,20 @@ lx, ly = tangent_landing_ramp(xs, ys, vxs, vys, max_drop)
 v_imp, KE, F_avg, g_force = impact_metrics(mass, vxs, vys, max_drop, g)
 
 # ----------------------
+# Landing Zone Safety Classification
+# ----------------------
+
+if g_force <= 5:
+    landing_color = "green"
+    landing_label = "Safe landing zone (< 5 G’s)"
+elif g_force <= 10:
+    landing_color = "gold"
+    landing_label = "Moderate risk zone (5–10 G’s)"
+else:
+    landing_color = "red"
+    landing_label = "High risk zone (> 10 G’s)"
+
+# ----------------------
 # Plot
 # ----------------------
 
@@ -174,7 +203,21 @@ fig, ax = plt.subplots(figsize=(9, 5))
 
 ax.plot(xs, ys, label="Flight Path")
 ax.plot(trx, try_, label=f"Takeoff Ramp ({ramp_len:.2f} {units})")
-ax.plot(lx, ly, label="Safe Landing Ramp")
+ax.plot(
+    lx,
+    ly,
+    color=landing_color,
+    linewidth=3,
+    label=landing_label
+)
+ax.fill_between(
+    lx,
+    ly,
+    ly - max_drop,
+    color=landing_color,
+    alpha=0.15
+)
+
 ax.scatter(hx, hy)
 ax.scatter(tx, ty)
 ax.text(hx, hy, f" Apex ({hx:.2f}, {hy:.2f})")
@@ -207,18 +250,26 @@ else:
 
 force_multiple = F_display / body_weight_force
 
-st.write(f"**Impact speed:** {v_imp:.2f} {units}/s")
+if unit_system == "Metric":
+    impact_speed_display = v_imp * 3.6        # m/s → km/h
+    impact_speed_units = "km/h"
+else:
+    impact_speed_display = v_imp * 0.681818   # ft/s → mi/h
+    impact_speed_units = "mi/h"
+
+st.write(f"**Impact speed:** {impact_speed_display:.1f} {impact_speed_units}")
+
 st.write(f"**Kinetic energy at impact:** {KE_display:.1f} {KE_units}")
 st.write(f"**Average stopping force:** {F_display:.1f} {F_units}")
 st.write(f"**Equivalent rider load:** {force_multiple:.1f} × body weight")
-st.write(f"**Equivalent g-force on rider:** {g_force:.2f} g")
+st.write(f"**Equivalent g-force on rider:** {g_force:.2f} G's")
 
 st.markdown(
     """
 **Design guidance (rule-of-thumb):**
-- 🟢 **< 5 g** → generally safer / controllable landing  
-- 🟡 **5–10 g** → increasing injury risk  
-- 🔴 **> 10 g** → high risk of serious injury  
+- 🟢 **< 5 G's** → generally safer / controllable landing  
+- 🟡 **5–10 G's** → increasing injury risk  
+- 🔴 **> 10 G's** → high risk of serious injury  
 
 *Landing ramps are typically designed to limit effective fall height
 and keep rider g-loads below ~5 g where possible.*
@@ -231,6 +282,7 @@ elif g_force > 5:
     st.warning("⚠️ Moderate injury risk")
 else:
     st.success("✅ Landing forces within safer design range")
+
 
 
 
