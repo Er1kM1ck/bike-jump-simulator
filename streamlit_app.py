@@ -208,7 +208,6 @@ xs, ys, vxs, vys, ts = simulate_projectile(
     landing_height=landing_height
 )
 
-xs, ys, vxs, vys, ts = simulate_projectile(v0, angle, mass, area, Cd, rho, wind_vx, wind_vy, g)
 hx, hy, h_idx = apex(xs, ys)
 tx, ty = xs[-1], ys[-1]
 
@@ -326,6 +325,7 @@ elif g_force > 5:
     st.warning("⚠️ Moderate injury risk")
 else:
     st.success("✅ Landing forces within safer design range")
+
 
 
 
