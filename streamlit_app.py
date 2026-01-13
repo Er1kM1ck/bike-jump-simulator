@@ -176,6 +176,37 @@ else:
     units = "ft"
     max_drop = 4.0
 
+# ----------------------
+# Temporary simulation to determine apex limit
+# ----------------------
+
+xs_tmp, ys_tmp, vxs_tmp, vys_tmp, _ = simulate_projectile(
+    v0, angle, mass, area, Cd, rho, wind_vx, wind_vy, g
+)
+
+_, apex_height, _ = apex(xs_tmp, ys_tmp)
+
+# ----------------------
+# Landing Elevation (Constrained to Apex)
+# ----------------------
+
+if unit_system == "Metric":
+    landing_height = st.slider(
+        "Landing Elevation (relative to takeoff)",
+        min_value=-10.0,
+        max_value=float(apex_height),
+        value=min(0.0, float(apex_height)),
+        help="Landing height cannot exceed the apex of the jump"
+    )
+else:
+    landing_height = st.slider(
+        "Landing Elevation (relative to takeoff)",
+        min_value=-30.0,
+        max_value=float(apex_height),
+        value=min(0.0, float(apex_height)),
+        help="Landing height cannot exceed the apex of the jump"
+    )
+
     col1, col2 = st.columns(2)
     with col1:
         v0_mph = st.slider("Launch Speed (mi/hr)", 5.0, 80.0, 30.0)
@@ -310,6 +341,7 @@ elif g_force > 5:
     st.warning("⚠️ Moderate injury risk")
 else:
     st.success("✅ Landing forces within safer design range")
+
 
 
 
