@@ -53,7 +53,6 @@ def simulate_projectile(
 
     return np.array(xs), np.array(ys), np.array(vxs), np.array(vys), np.array(ts)
 
-
 def apex(xs, ys):
     i = np.argmax(ys)
     return xs[i], ys[i], i
@@ -119,12 +118,10 @@ def tangent_landing_ramp(xs, ys, vxs, vys, landing_height, max_drop):
     ramp_y = y0 + slope * (ramp_x - x0)
 
 # --- CLIP RAMP TO NEVER EXCEED FLIGHT PATH ---
-flight_y_at_ramp = np.interp(ramp_x, xs, ys)
-ramp_y = np.minimum(ramp_y, flight_y_at_ramp)
-
+    flight_y_at_ramp = np.interp(ramp_x, xs, ys)
+    ramp_y = np.minimum(ramp_y, flight_y_at_ramp)
 
     return ramp_x, ramp_y
-
 
 # ----------------------
 # Impact & Energy Safety
@@ -480,6 +477,7 @@ elif g_force > 5:
     st.warning("⚠️ Moderate injury risk")
 else:
     st.success("✅ Landing forces within safer design range")
+
 
 
 
