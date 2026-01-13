@@ -165,17 +165,18 @@ else:
         area = st.slider("Cross-sectional Area (ft²)", 1.0, 22.0, 7.5)
 
 Cd = st.slider("Drag Coefficient", 0.5, 1.3, 1.0)
-wind_speed = st.slider(f"Wind Speed ({units}/s)", -30.0, 30.0, -5.0)
+if unit_system == "Metric":
+    wind_speed_kmh = st.slider("Wind Speed (km/hr)", -50.0, 50.0, 0.0)
+    wind_speed = wind_speed_kmh / 3.6
+else:
+    wind_speed_mph = st.slider("Wind Speed (mi/hr)", -30.0, 30.0, 0.0)
+    wind_speed = wind_speed_mph * 1.46667
+
 wind_angle = st.slider("Wind Direction (deg, 0=headwind)", -180.0, 180.0, 0.0)
 
 wind_vx = wind_speed * np.cos(np.deg2rad(wind_angle))
 wind_vy = wind_speed * np.sin(np.deg2rad(wind_angle))
 
-xs_tmp, ys_tmp, _, _, _ = simulate_projectile(
-    v0, angle, mass, area, Cd, rho, wind_vx, wind_vy, g
-)
-
-_, apex_height, _ = apex(xs_tmp, ys_tmp)
 
 landing_height = st.slider(
     "Landing Elevation (relative to takeoff)",
@@ -243,6 +244,7 @@ ax.set_xlabel(f"Horizontal Distance ({units})")
 ax.set_ylabel(f"Vertical Height ({units})")
 ax.legend()
 ax.grid(True)
+ax.set_aspect("equal", adjustable="box")
 
 plot_placeholder.pyplot(fig)
 
@@ -299,6 +301,7 @@ elif g_force > 5:
     st.warning("⚠️ Moderate injury risk")
 else:
     st.success("✅ Landing forces within safer design range")
+
 
 
 
