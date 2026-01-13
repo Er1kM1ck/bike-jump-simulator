@@ -112,7 +112,9 @@ def tangent_landing_ramp(xs, ys, vxs, vys, landing_height, max_drop):
 
     # Build ramp backward toward the apex (this is the key fix)
     ramp_length = max_drop * 4
-    ramp_x = np.linspace(x0 - ramp_length, x0, 60)
+    
+    ramp_length = 5.0  # horizontal length of landing ramp
+    ramp_x = np.linspace(x0 - ramp_length, x0, 50)
     ramp_y = y0 + slope * (ramp_x - x0)
 
     return ramp_x, ramp_y
@@ -370,13 +372,16 @@ ax.set_ylim(
 
 ax.plot(xs, ys, label="Flight Path")
 ax.plot(trx, try_, label=f"Takeoff Ramp ({ramp_len:.2f} {units})")
+
+# Landing ramp (always green)
 ax.plot(
     lx,
     ly,
-    color=landing_color,
+    color="green",
     linewidth=3,
-    label=landing_label
+    label="Landing Ramp (tangent)"
 )
+
 ax.fill_between(
     lx,
     ly,
@@ -469,6 +474,7 @@ elif g_force > 5:
     st.warning("⚠️ Moderate injury risk")
 else:
     st.success("✅ Landing forces within safer design range")
+
 
 
 
